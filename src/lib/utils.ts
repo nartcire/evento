@@ -3,6 +3,7 @@ import clsx, { ClassValue } from "clsx";
 import { notFound } from "next/navigation";
 import prisma from "./db";
 import { twMerge } from "tailwind-merge";
+import { unstable_cache } from "next/cache";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -12,7 +13,7 @@ export function capitalize(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-export async function getEvents(city: string, page = 1) {
+export const getEvents = unstable_cache(async (city: string, page = 1) => {
   const events = await prisma.eventoEvent.findMany({
     where: {
       city: city === "all" ? undefined : capitalize(city),
@@ -43,9 +44,9 @@ export async function getEvents(city: string, page = 1) {
     events,
     totalCount,
   };
-}
+});
 
-export async function getEvent(slug: string) {
+export const getEvent = unstable_cache(async (slug: string) => {
   const event = await prisma.eventoEvent.findUnique({
     where: {
       slug: slug,
@@ -57,4 +58,4 @@ export async function getEvent(slug: string) {
   }
 
   return event;
-}
+});
